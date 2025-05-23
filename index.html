@@ -2,108 +2,100 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Market Round Calculator</title>
+  <title>Coffee Time Wycombe - Dutching Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 2rem;
       background-color: #f9f9f9;
+      color: #333;
       max-width: 600px;
       margin: auto;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 1rem;
-    }
-    th, td {
-      padding: 8px;
+    h1, h2 {
       text-align: center;
     }
-    input[type="number"] {
-      width: 80px;
-      padding: 5px;
-    }
-    button {
+    input[type="text"], input[type="number"] {
       width: 100%;
       padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 10px 20px;
       background-color: #6b4c3b;
       color: white;
       border: none;
       border-radius: 5px;
-      font-size: 16px;
       cursor: pointer;
+      width: 100%;
     }
     button:hover {
       background-color: #593f30;
     }
-    tfoot td {
-      font-weight: bold;
-      background-color: #eee;
+    .results {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #fff;
+      border-left: 5px solid #6b4c3b;
+    }
+    .profit {
+      color: green;
+    }
+    .loss {
+      color: red;
     }
   </style>
 </head>
 <body>
+  <h1>Coffee Time Wycombe</h1>
+  <h2>Dutching Calculator</h2>
 
-<h1>Exchange Ladder Calculator</h1>
-<p>Enter up to 10 back and lay odds below:</p>
+  <label for="backOdds">Enter Back Odds (comma-separated):</label>
+  <input type="text" id="backOdds" placeholder="e.g. 1.87, 9.4, 55">
 
-<table border="1">
-  <thead>
-    <tr>
-      <th>Back Odds</th>
-      <th>Lay Odds</th>
-    </tr>
-  </thead>
-  <tbody>
-    <!-- Generate 10 rows -->
-    <script>
-      for (let i = 0; i < 10; i++) {
-        document.write(`
-          <tr>
-            <td><input type="number" step="0.01" class="back" placeholder="e.g. 1.87"></td>
-            <td><input type="number" step="0.01" class="lay" placeholder="e.g. 1.88"></td>
-          </tr>
-        `);
+  <label for="maxStake">Enter Maximum Stake on Favourite (£):</label>
+  <input type="number" id="maxStake" placeholder="e.g. 10">
+
+  <button onclick="calculateDutching()">Calculate</button>
+
+  <div class="results" id="results"></div>
+
+  <script>
+    function calculateDutching() {
+      const backInput = document.getElementById("backOdds").value;
+      const maxStake = parseFloat(document.getElementById("maxStake").value);
+
+      const odds = backInput.split(",").map(n => parseFloat(n.trim())).filter(n => n > 1);
+      if (odds.length < 2 || isNaN(maxStake) || maxStake <= 0) {
+        alert("Please enter valid odds (at least 2) and a positive stake.");
+        return;
       }
-    </script>
-  </tbody>
-  <tfoot>
-    <tr>
-      <td id="backTotal">Over round: –</td>
-      <td id="layTotal">Under round: –</td>
-    </tr>
-  </tfoot>
-</table>
 
-<button onclick="calculateRound()">Calculate</button>
+      const favouriteOdds = Math.min(...odds);
+      const otherOdds = odds.filter(odd => odd !== favouriteOdds);
 
-<script>
-  function calculateRound() {
-    const backInputs = document.querySelectorAll('.back');
-    const layInputs = document.querySelectorAll('.lay');
+      // Calculate total inverse of other horses
+      const invTotal = otherOdds.reduce((sum, o) => sum + (1 / o), 0);
+      const targetProfit = maxStake; // This is how much profit each non-fav should make
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "";
 
-    let backTotal = 0;
-    let layTotal = 0;
+      let html = `<p class="loss">Favourite @ ${favouriteOdds} → Loss: £${maxStake.toFixed(2)}</p><hr>`;
 
-    backInputs.forEach(input => {
-      const val = parseFloat(input.value);
-      if (!isNaN(val) && val > 0) {
-        backTotal += 1 / val;
-      }
-    });
+      otherOdds.forEach(odd => {
+        const stake = targetProfit / (odd - 1);
+        html += `<p>Horse @ ${odd} → Stake: £${stake.toFixed(2)} — <span class="profit">Profit: £${targetProfit.toFixed(2)}</span></p>`;
+      });
 
-    layInputs.forEach(input => {
-      const val = parseFloat(input.value);
-      if (!isNaN(val) && val > 0) {
-        layTotal += 1 / val;
-      }
-    });
+      resultsDiv.innerHTML = html;
+    }
+  </script>
 
-    document.getElementById('backTotal').innerText = `Over round: ${(backTotal * 100).toFixed(2)}%`;
-    document.getElementById('layTotal').innerText = `Under round: ${(layTotal * 100).toFixed(2)}%`;
-  }
-</script>
+
 <footer style="margin-top: 2rem; font-size: 0.9em; text-align: center; color: #666;">
   <hr>
   <p>&copy; 2024 Philip Howell. All rights reserved.</p>
