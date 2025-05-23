@@ -2,106 +2,158 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Coffee Time - Dutching Calculator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Betting Odds Calculator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 2rem;
-      background-color: #f9f9f9;
-      color: #333;
-      max-width: 600px;
-      margin: auto;
+      padding: 20px;
     }
-    h1, h2 {
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
       text-align: center;
     }
-    input[type="text"], input[type="number"] {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      margin-bottom: 20px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+    th {
+      background-color: #f2f2f2;
     }
-    button {
-      padding: 10px 20px;
-      background-color: #6b4c3b;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      width: 100%;
+    .matched {
+      background-color: #c8f7c5;
     }
-    button:hover {
-      background-color: #593f30;
-    }
-    .results {
-      margin-top: 20px;
-      padding: 10px;
-      background-color: #fff;
-      border-left: 5px solid #6b4c3b;
-    }
-    .profit {
-      color: green;
-    }
-    .loss {
-      color: red;
+    .unmatched {
+      background-color: #f7c5c5;
     }
   </style>
 </head>
 <body>
-  <h1>Coffee Time Wycombe</h1>
-  <h2>Dutching Calculator</h2>
-
-  <label for="backOdds">Enter Back Odds (comma-separated):</label>
-  <input type="text" id="backOdds" placeholder="e.g. 1.87, 9.4, 55">
-
-  <label for="maxStake">Enter Maximum Stake on Favourite (£):</label>
-  <input type="number" id="maxStake" placeholder="e.g. 10">
-
-  <button onclick="calculateDutching()">Calculate</button>
-
-  <div class="results" id="results"></div>
+  <h2>Betting Odds Calculator</h2>
+  <table id="oddsTable">
+    <thead>
+      <tr>
+        <th>Odds</th>
+        <th>Percentage</th>
+        <th>Stake</th>
+        <th>Status</th>
+        <th>Return</th>
+        <th>New Over-Round</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Rows will be generated dynamically -->
+    </tbody>
+    <tfoot>
+      <tr>
+        <td><strong>Total:</strong></td>
+        <td id="totalPercentage">0%</td>
+        <td colspan="4"></td>
+      </tr>
+    </tfoot>
+  </table>
 
   <script>
-    function calculateDutching() {
-      const backInput = document.getElementById("backOdds").value;
-      const maxStake = parseFloat(document.getElementById("maxStake").value);
+    const odds = [2.86, 4, 6.8, 6.8, 9.4, 85];
 
-      const odds = backInput.split(",").map(n => parseFloat(n.trim())).filter(n => n > 1);
-      if (odds.length < 2 || isNaN(maxStake) || maxStake <= 0) {
-        alert("Please enter valid odds (at least 2) and a positive stake.");
-        return;
-      }
+    function createRow(odd, index) {
+      const table = document.querySelector('#oddsTable tbody');
+      const row = document.createElement('tr');
 
-      const favouriteOdds = Math.min(...odds);
-      const otherOdds = odds.filter(odd => odd !== favouriteOdds);
+      row.innerHTML = `
+        <td><input type="number" step="0.01" value="${odd}" class="oddInput" data-index="${index}" /></td>
+        <td class="percentageCell">${(1 / odd * 100).toFixed(2)}%</td>
+        <td><input type="number" step="0.01" class="stakeInput" data-index="${index}" /></td>
+        <td><button class="statusButton" data-index="${index}">Unmatched</button></td>
+        <td class="returnCell">-</td>
+        <td class="newOverRoundCell">-</td>
+      `;
 
-      // Calculate total inverse of other horses
-      const invTotal = otherOdds.reduce((sum, o) => sum + (1 / o), 0);
-      const targetProfit = maxStake; // This is how much profit each non-fav should make
-      const resultsDiv = document.getElementById("results");
-      resultsDiv.innerHTML = "";
+      table.appendChild(row);
+    }
 
-      let html = `<p class="loss">Favourite @ ${favouriteOdds} → Loss: £${maxStake.toFixed(2)}</p><hr>`;
+    function updatePercentages() {
+      const rows = document.querySelectorAll('#oddsTable tbody tr');
+      let total = 0;
+      rows.forEach(row => {
+        const odd = parseFloat(row.querySelector('.oddInput').value);
+        const percentage = 1 / odd * 100;
+        row.querySelector('.percentageCell').textContent = `${percentage.toFixed(2)}%`;
+        total += percentage;
+      });
+      document.getElementById('totalPercentage').textContent = `${total.toFixed(2)}%`;
+    }
 
-      otherOdds.forEach(odd => {
-        const stake = targetProfit / (odd - 1);
-        html += `<p>Horse @ ${odd} → Stake: £${stake.toFixed(2)} — <span class="profit">Profit: £${targetProfit.toFixed(2)}</span></p>`;
+    function updateReturns() {
+      const rows = document.querySelectorAll('#oddsTable tbody tr');
+      let newTotal = 0;
+
+      rows.forEach((row, idx) => {
+        const button = row.querySelector('.statusButton');
+        const stakeInput = row.querySelector('.stakeInput');
+        const returnCell = row.querySelector('.returnCell');
+        const overRoundCell = row.querySelector('.newOverRoundCell');
+        const percentageCell = row.querySelector('.percentageCell');
+
+        const odd = parseFloat(row.querySelector('.oddInput').value);
+        const stake = parseFloat(stakeInput.value) || 0;
+        const percentage = 1 / odd * 100;
+
+        if (button.textContent === 'Matched') {
+          row.className = 'matched';
+          returnCell.textContent = `+£${(stake * (odd - 1)).toFixed(2)}`;
+          overRoundCell.textContent = `${percentage.toFixed(2)}%`;
+          newTotal += percentage;
+        } else {
+          row.className = 'unmatched';
+          returnCell.textContent = `-£${stake.toFixed(2)}`;
+          overRoundCell.textContent = '-';
+        }
       });
 
-      resultsDiv.innerHTML = html;
+      // Update new over-round for all rows
+      document.querySelectorAll('.newOverRoundCell').forEach(cell => {
+        if (cell.textContent === '-') {
+          cell.textContent = `${newTotal.toFixed(2)}%`;
+        }
+      });
     }
+
+    function toggleMatch(index) {
+      const rows = document.querySelectorAll('#oddsTable tbody tr');
+      const row = rows[index];
+      const button = row.querySelector('.statusButton');
+
+      if (button.textContent === 'Unmatched') {
+        button.textContent = 'Matched';
+      } else {
+        button.textContent = 'Unmatched';
+      }
+      updateReturns();
+    }
+
+    // Initialize rows
+    odds.forEach((odd, index) => createRow(odd, index));
+    updatePercentages();
+
+    // Add event listeners
+    document.querySelectorAll('.oddInput').forEach(input => {
+      input.addEventListener('input', () => {
+        updatePercentages();
+        updateReturns();
+      });
+    });
+
+    document.querySelectorAll('.stakeInput').forEach(input => {
+      input.addEventListener('input', updateReturns);
+    });
+
+    document.querySelectorAll('.statusButton').forEach(button => {
+      button.addEventListener('click', () => {
+        toggleMatch(parseInt(button.dataset.index));
+      });
+    });
   </script>
-
-
-<footer style="margin-top: 2rem; font-size: 0.9em; text-align: center; color: #666;">
-  <hr>
-  <p>&copy; 2024 Philip Howell. All rights reserved.</p>
-  <p>This tool is proprietary and not licensed for redistribution or commercial use.</p>
-  <p>For inquiries, contact <a href="mailto:phowell085@gmail.com">phowell085@gmail.com</a>.</p>
-</footer>
-
 </body>
 </html>
+
