@@ -1,15 +1,80 @@
-<!-- index.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My One Page Website</title>
-    <style>
-        body { font-family: sans-serif; text-align: center; padding: 50px; background: #f0f0f0; }
-        h1 { color: #333; }
-    </style>
+  <meta charset="UTF-8">
+  <title>Coffee Time Wycombe - Market Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background-color: #f9f9f9;
+      color: #333;
+      max-width: 600px;
+      margin: auto;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #6b4c3b;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover {
+      background-color: #593f30;
+    }
+    .results {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #fff;
+      border-left: 5px solid #6b4c3b;
+    }
+  </style>
 </head>
 <body>
-    <h1>Welcome to My Website!</h1>
-    <p>This is a one-page static site hosted on GitHub Pages.</p>
+  <h1>Coffee Time Wycombe</h1>
+  <h2>Market Over/Under Round Calculator</h2>
+
+  <label for="backOdds">Enter Back Odds (comma-separated):</label>
+  <input type="text" id="backOdds" placeholder="e.g. 1.87, 9.4, 55">
+
+  <label for="layOdds">Enter Lay Odds (comma-separated):</label>
+  <input type="text" id="layOdds" placeholder="e.g. 1.88, 10.5, 70">
+
+  <button onclick="calculateRound()">Calculate</button>
+
+  <div class="results">
+    <p id="backTotal">Over round: –</p>
+    <p id="layTotal">Under round: –</p>
+  </div>
+
+  <script>
+    function calculateRound() {
+      const backInput = document.getElementById("backOdds").value;
+      const layInput = document.getElementById("layOdds").value;
+
+      const backOdds = backInput.split(",").map(n => parseFloat(n.trim())).filter(n => n > 0);
+      const layOdds = layInput.split(",").map(n => parseFloat(n.trim())).filter(n => n > 0);
+
+      const backSum = backOdds.reduce((sum, odd) => sum + (1 / odd), 0) * 100;
+      const laySum = layOdds.reduce((sum, odd) => sum + (1 / odd), 0) * 100;
+
+      document.getElementById("backTotal").innerText = `Over round: ${backSum.toFixed(2)}%`;
+      document.getElementById("layTotal").innerText = `Under round: ${laySum.toFixed(2)}%`;
+    }
+  </script>
 </body>
 </html>
