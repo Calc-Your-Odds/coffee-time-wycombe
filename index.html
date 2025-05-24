@@ -26,6 +26,12 @@
     .unmatched {
       background-color: #f7c5c5;
     }
+    .positive {
+      color: green;
+    }
+    .negative {
+      color: red;
+    }
   </style>
 </head>
 <body>
@@ -107,6 +113,8 @@
         const returnCell = row.querySelector('.returnCell');
         const overRoundCell = row.querySelector('.newOverRoundCell');
 
+        returnCell.classList.remove('positive', 'negative');
+
         if (matched) {
           row.className = 'matched';
           const profit = stake * (odd - 1);
@@ -116,7 +124,14 @@
               loss += s.stake;
             }
           });
-          returnCell.textContent = `+£${(profit - loss).toFixed(2)}`;
+          const net = profit - loss;
+          if (net >= 0) {
+            returnCell.textContent = `+£${net.toFixed(2)}`;
+            returnCell.classList.add('positive');
+          } else {
+            returnCell.textContent = `-£${Math.abs(net).toFixed(2)}`;
+            returnCell.classList.add('negative');
+          }
           overRoundCell.textContent = `${(1 / odd * 100).toFixed(2)}%`;
         } else {
           row.className = 'unmatched';
@@ -127,6 +142,7 @@
             }
           });
           returnCell.textContent = `-£${loss.toFixed(2)}`;
+          returnCell.classList.add('negative');
           overRoundCell.textContent = matchedTotal.toFixed(2) + '%';
         }
       });
