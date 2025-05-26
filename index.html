@@ -1,388 +1,316 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Back bet calculator</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    padding: 20px;
-    margin: 0;
-  }
-  nav {
-    margin-bottom: 20px;
-  }
-  nav a {
-    margin-right: 20px;
-    font-weight: bold;
-    text-decoration: none;
-    color: #3366cc;
-  }
-  nav a:hover {
-    text-decoration: underline;
-  }
-
-  h2 {
-    margin-top: 0;
-  }
-
-  table {
-    border-collapse: collapse;
-    width: 100%;
-  }
-  th, td {
-    border: 1px solid #ccc;
-    padding: 8px;
-    text-align: center;
-    white-space: nowrap;
-  }
-  th {
-    background: #eef;
-  }
-  input[type=number] {
-    width: 90px;
-    padding: 5px;
-    box-sizing: border-box;
-  }
-
-  .positive {
-    color: green;
-  }
-  .negative {
-    color: red;
-  }
-
-  #comment {
-    margin-top: 10px;
-    font-weight: bold;
-    color: green;
-    text-align: center;
-  }
-
-  /* Container for each calculator with blue border */
-  section.calculator {
-    border: 2px solid #5dade2;
-    padding: 15px;
-    margin-bottom: 25px;
-    border-radius: 6px;
-  }
-
-  /* Labels and inputs stacked vertically with some spacing */
-  .input-group {
-    margin-bottom: 15px;
-  }
-  .input-group label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
-  }
-  .input-group input[type=number] {
-    width: 100%;
-    max-width: 150px;
-  }
-
-  /* Highlight Stake value fields with light blue background */
-  .stake-value {
-    background-color: #d7e9fb;
-    padding: 3px 6px;
-    font-weight: bold;
-    display: inline-block;
-    margin-top: 5px;
-    border-radius: 3px;
-  }
-
-  /* Wider columns for returns to prevent wrapping */
-  #oddsTable th:nth-child(4),
-  #oddsTable th:nth-child(5),
-  #oddsTable td:nth-child(4),
-  #oddsTable td:nth-child(5) {
-    min-width: 110px;
-  }
-
-  /* Responsive styles */
-  @media (max-width: 768px) {
-    nav {
-      display: none; /* Hide nav on mobile to simplify */
-    }
+  <meta charset="UTF-8" />
+  <title>Back Betting Odds Calculator</title>
+  <style>
     body {
-      padding: 10px;
+      font-family: Arial, sans-serif;
+      padding: 20px;
     }
-  }
-
-  /* Hide all sections by default on mobile except the active one */
-  @media (max-width: 768px) {
-    section.calculator {
-      display: none;
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 30px;
+      table-layout: fixed;
+      word-wrap: break-word;
     }
-    section.calculator.active {
-      display: block;
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+      white-space: nowrap; /* prevent wrapping */
     }
-    #backToFullViewBtn {
-      display: block;
-      margin-bottom: 20px;
-      padding: 8px 15px;
+    th {
+      background-color: #f9f9f9;
+    }
+    .positive {
+      color: green;
+    }
+    .negative {
+      color: red;
+    }
+    #comment {
+      margin-top: 10px;
       font-weight: bold;
-      background-color: #5dade2;
-      color: white;
-      border: none;
-      border-radius: 4px;
+      color: green;
+      text-align: center;
+    }
+    nav a {
+      margin-right: 20px;
+      font-weight: bold;
+      text-decoration: none;
+      color: #3366cc;
       cursor: pointer;
     }
-  }
-  #backToFullViewBtn {
-    display: none;
-  }
-
-</style>
+    .highlight-yellow {
+      background-color: #fffde7;
+    }
+    .highlight-grey {
+      background-color: #f0f0f0;
+      padding: 10px;
+    }
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+    input[type="number"] {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 6px;
+      margin-top: 4px;
+    }
+    /* Highlight Stake value in light blue */
+    .stake-value {
+      background-color: #d0e8ff;
+      padding: 4px 8px;
+      display: inline-block;
+      font-weight: bold;
+      margin-top: 6px;
+      border-radius: 4px;
+    }
+    /* Make nav and back button fixed on mobile for easy access */
+    @media (max-width: 768px) {
+      nav {
+        position: sticky;
+        top: 0;
+        background: white;
+        padding: 10px 0;
+        z-index: 10;
+        border-bottom: 1px solid #ddd;
+      }
+      #backToFullViewBtn {
+        width: 100%;
+        padding: 10px;
+        font-size: 1.1em;
+        margin-bottom: 20px;
+        cursor: pointer;
+      }
+      /* On mobile, sections initially all shown, JS hides */
+      section {
+        margin-bottom: 30px;
+      }
+    }
+  </style>
 </head>
 <body>
 
-<nav>
-  <a href="#backBetCalculator" onclick="return handleMobileNav(event, 'backBetCalculator')">Back bet calculator</a>
-  <a href="#exactly2GoalsMarket" onclick="return handleMobileNav(event, 'exactly2GoalsMarket')">Create Exactly 2 Goals Market</a>
-  <a href="#twoThreeGoalSpread" onclick="return handleMobileNav(event, 'twoThreeGoalSpread')">Create 2 and 3 Goal Spread</a>
-</nav>
+  <nav>
+    <a href="#backBetCalculatorSection" onclick="return handleMobileNav(event, 'backBetCalculatorSection')">Back bet calculator</a>
+    <a href="#exactly2GoalsMarketSection" onclick="return handleMobileNav(event, 'exactly2GoalsMarketSection')">Create Exactly 2 Goals Market</a>
+    <a href="#twoThreeSpreadSection" onclick="return handleMobileNav(event, 'twoThreeSpreadSection')">Create 2 and 3 Goal Spread</a>
+  </nav>
 
-<button id="backToFullViewBtn" onclick="showAllSections()">Back to full view</button>
+  <button id="backToFullViewBtn" style="display:none;" onclick="showAllSections()">Back to full view</button>
 
-<section id="backBetCalculator" class="calculator">
-  <h2>Back bet calculator</h2>
-  <table id="oddsTable" aria-label="Back bet odds calculator table">
-    <thead>
-      <tr>
-        <th>Odds</th>
-        <th>Percentage</th>
-        <th>Stake</th>
-        <th>Single Line Return</th>
-        <th>Market P/L</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Rows inserted by JS -->
-    </tbody>
-    <tfoot>
-      <tr>
-        <td><strong>Total Over round:</strong></td>
-        <td id="totalPercentage">0%</td>
-        <td colspan="3"></td>
-      </tr>
-    </tfoot>
-  </table>
-  <div id="comment"></div>
-</section>
+  <section id="backBetCalculatorSection">
+    <h2>Back Betting Odds Calculator</h2>
+    <table id="oddsTable">
+      <thead>
+        <tr>
+          <th style="width:10%;">Odds</th>
+          <th style="width:15%;">Percentage</th>
+          <th style="width:15%;">Stake</th>
+          <th style="width:30%;">Single Line Return</th>
+          <th style="width:30%;">Market P/L</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+      <tfoot>
+        <tr>
+          <td><strong>Total Over round:</strong></td>
+          <td id="totalPercentage">0%</td>
+          <td colspan="3"></td>
+        </tr>
+      </tfoot>
+    </table>
+    <div id="comment"></div>
+  </section>
 
-<section id="exactly2GoalsMarket" class="calculator">
-  <h2>Create Exactly 2 Goals Market</h2>
-  <div class="input-group">
-    <label for="over15"><strong>Back - Over 1.5 Goals Odds:</strong></label>
-    <input type="number" id="over15" step="0.01" min="0" />
-  </div>
-  <div class="input-group">
-    <label for="under25"><strong>Back - Under 2.5 Goals Odds:</strong></label>
-    <input type="number" id="under25" step="0.01" min="0" />
-  </div>
-  <div class="input-group">
-    <label for="floatAmount"><strong>Float (£):</strong></label>
-    <input type="number" id="floatAmount" step="0.01" min="0" />
-  </div>
-  <button onclick="calculateGoalsMarket('twoGoalsResults', ['2'], 'over15', 'under25', 'floatAmount')">Calculate</button>
-  <div id="twoGoalsResults" style="margin-top:15px;"></div>
-</section>
+  <section id="exactly2GoalsMarketSection">
+    <h2>Create Exactly 2 Goals Market</h2>
+    <label><b>Back - Over 1.5 Goals Odds:</b><br /><input type="number" id="over15" step="0.01" /></label>
+    <label><b>Back - Under 2.5 Goals Odds:</b><br /><input type="number" id="under25" step="0.01" /></label>
+    <label><b>Float (£):</b><br /><input type="number" id="floatAmount" step="0.01" /></label>
+    <button onclick="calculateGoalsMarket('twoGoalsResults', ['2'], 'over15', 'under25', 'floatAmount')">Calculate</button>
+    <div id="twoGoalsResults"></div>
+  </section>
 
-<section id="twoThreeGoalSpread" class="calculator">
-  <h2>Create 2 and 3 Goal Spread</h2>
-  <div class="input-group">
-    <label for="spreadOver15"><strong>Back - Over 1.5 Goals Odds:</strong></label>
-    <input type="number" id="spreadOver15" step="0.01" min="0" />
-  </div>
-  <div class="input-group">
-    <label for="spreadUnder35"><strong>Back - Under 3.5 Goals Odds:</strong></label>
-    <input type="number" id="spreadUnder35" step="0.01" min="0" />
-  </div>
-  <div class="input-group">
-    <label for="spreadFloatAmount"><strong>Float (£):</strong></label>
-    <input type="number" id="spreadFloatAmount" step="0.01" min="0" />
-  </div>
-  <button onclick="calculateGoalsMarket('twoThreeGoalsResults', ['2', '3'], 'spreadOver15', 'spreadUnder35', 'spreadFloatAmount')">Calculate</button>
-  <div id="twoThreeGoalsResults" style="margin-top:15px;"></div>
-</section>
+  <section id="twoThreeSpreadSection">
+    <h2>Create 2 and 3 Goal Spread</h2>
+    <label><b>Back - Over 1.5 Goals Odds:</b><br /><input type="number" id="spreadOver15" step="0.01" /></label>
+    <label><b>Back - Under 3.5 Goals Odds:</b><br /><input type="number" id="spreadUnder35" step="0.01" /></label>
+    <label><b>Float (£):</b><br /><input type="number" id="spreadFloatAmount" step="0.01" /></label>
+    <button onclick="calculateGoalsMarket('spreadResults', ['2','3'], 'spreadOver15', 'spreadUnder35', 'spreadFloatAmount')">Calculate</button>
+    <div id="spreadResults"></div>
+  </section>
 
-<script>
-  // Build 15 rows for back bet calculator table
-  const tbody = document.querySelector('#oddsTable tbody');
-  for (let i = 0; i < 15; i++) {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><input type="number" step="0.01" min="0" class="oddInput" aria-label="Odds row ${i + 1}"/></td>
-      <td class="percentageCell">0.00%</td>
-      <td><input type="number" step="0.01" min="0" class="stakeInput" aria-label="Stake row ${i + 1}"/></td>
-      <td class="returnCell">-</td>
-      <td class="marketPLCell">-</td>
-    `;
-    tbody.appendChild(tr);
-  }
+  <script>
+    // Create 15 rows instead of 6
+    const odds = [2.86, 4, 6.8, 6.8, 9.4, 85, '', '', '', '', '', '', '', '', ''];
 
-  function updatePercentages() {
-    const rows = tbody.querySelectorAll('tr');
-    let total = 0;
-    rows.forEach(row => {
-      const oddInput = row.querySelector('.oddInput');
-      const percentageCell = row.querySelector('.percentageCell');
-      const odd = parseFloat(oddInput.value);
-      let perc = 0;
-      if (odd && odd > 0) {
-        perc = 100 / odd;
+    function createRow(odd, index) {
+      const table = document.querySelector('#oddsTable tbody');
+      const oddVal = (odd === '' || odd === 0) ? '' : odd;
+      const percentage = oddVal ? (1 / oddVal * 100).toFixed(2) + '%' : '-';
+
+      const row = document.createElement('tr');
+
+      row.innerHTML = `
+        <td><input type="number" step="0.01" value="${oddVal}" class="oddInput" data-index="${index}" /></td>
+        <td class="percentageCell">${percentage}</td>
+        <td><input type="number" step="0.01" class="stakeInput" data-index="${index}" /></td>
+        <td class="returnCell">-</td>
+        <td class="marketPLCell">-</td>
+      `;
+
+      table.appendChild(row);
+    }
+
+    function updatePercentages() {
+      const rows = document.querySelectorAll('#oddsTable tbody tr');
+      let total = 0;
+      rows.forEach(row => {
+        const oddInput = row.querySelector('.oddInput');
+        const odd = parseFloat(oddInput.value);
+        if (odd && odd > 0) {
+          const percentage = 1 / odd * 100;
+          row.querySelector('.percentageCell').textContent = `${percentage.toFixed(2)}%`;
+          total += percentage;
+        } else {
+          row.querySelector('.percentageCell').textContent = '-';
+        }
+      });
+      document.getElementById('totalPercentage').textContent = `${total.toFixed(2)}%`;
+      const comment = document.getElementById('comment');
+      if (total < 100) {
+        comment.textContent = 'With these odds a profitable cash out opportunity exists';
+      } else {
+        comment.textContent = '';
       }
-      percentageCell.textContent = perc.toFixed(2) + '%';
-      total += perc;
+    }
+
+    function updateReturns() {
+      const rows = document.querySelectorAll('#oddsTable tbody tr');
+      const stakes = Array.from(rows).map(row => parseFloat(row.querySelector('.stakeInput').value) || 0);
+      const totalStaked = stakes.reduce((a, b) => a + b, 0);
+
+      rows.forEach((row, index) => {
+        const oddInput = row.querySelector('.oddInput');
+        const odd = parseFloat(oddInput.value);
+        const stake = stakes[index];
+        const returnCell = row.querySelector('.returnCell');
+        const marketCell = row.querySelector('.marketPLCell');
+
+        if (!odd || odd === 0) {
+          returnCell.textContent = '-';
+          marketCell.textContent = '-';
+          return;
+        }
+
+        const profit = stake * (odd - 1);
+        const net = profit - (totalStaked - stake);
+
+        returnCell.textContent = `+£${(stake * odd).toFixed(2)}`;
+        returnCell.className = 'returnCell';
+
+        marketCell.textContent = net >= 0 ? `+£${net.toFixed(2)}` : `-£${Math.abs(net).toFixed(2)}`;
+        marketCell.className = 'marketPLCell ' + (net >= 0 ? 'positive' : 'negative');
+      });
+    }
+
+    odds.forEach((odd, index) => createRow(odd, index));
+    updatePercentages();
+
+    document.querySelectorAll('.oddInput').forEach(input => {
+      input.addEventListener('input', () => {
+        updatePercentages();
+        updateReturns();
+      });
     });
-    document.getElementById('totalPercentage').textContent = total.toFixed(2) + '%';
 
-    const comment = document.getElementById('comment');
-    comment.textContent = total < 100 ? 'With these odds a profitable cash out opportunity exists' : '';
-  }
-
-  function updateReturns() {
-    const rows = tbody.querySelectorAll('tr');
-    let totalStake = 0;
-    const stakes = [];
-    rows.forEach(row => {
-      const stakeInput = row.querySelector('.stakeInput');
-      const stake = parseFloat(stakeInput.value) || 0;
-      stakes.push(stake);
-      totalStake += stake;
+    document.querySelectorAll('.stakeInput').forEach(input => {
+      input.addEventListener('input', updateReturns);
     });
 
-    rows.forEach((row, i) => {
-      const oddInput = row.querySelector('.oddInput');
-      const returnCell = row.querySelector('.returnCell');
-      const marketPLCell = row.querySelector('.marketPLCell');
-      const odd = parseFloat(oddInput.value);
-      const stake = stakes[i];
+    function calculateGoalsMarket(resultId, winGoals, overId, underId, floatId) {
+      const overOdds = parseFloat(document.getElementById(overId).value);
+      const underOdds = parseFloat(document.getElementById(underId).value);
+      const floatAmount = parseFloat(document.getElementById(floatId).value);
 
-      if (!odd || odd <= 0) {
-        returnCell.textContent = '-';
-        marketPLCell.textContent = '-';
-        marketPLCell.className = 'marketPLCell';
+      if (!overOdds || !underOdds || !floatAmount) {
+        document.getElementById(resultId).innerHTML = '<p style="color:red;">Please fill all fields.</p>';
         return;
       }
 
-      const singleReturn = stake * odd;
-      const profit = singleReturn - totalStake;
-      returnCell.textContent = '+£' + singleReturn.toFixed(2);
-      marketPLCell.textContent = (profit >= 0 ? '+' : '-') + '£' + Math.abs(profit).toFixed(2);
-      marketPLCell.className = 'marketPLCell ' + (profit >= 0 ? 'positive' : 'negative');
-    });
-  }
+      const overStake = (1 / overOdds) * floatAmount;
+      const underStake = (1 / underOdds) * floatAmount;
+      const totalStake = overStake + underStake;
 
-  tbody.addEventListener('input', (event) => {
-    if (event.target.classList.contains('oddInput')) {
-      updatePercentages();
-      updateReturns();
-    }
-    if (event.target.classList.contains('stakeInput')) {
-      updateReturns();
-    }
-  });
+      const returnOnWin = (overStake * overOdds) + (underStake * underOdds) - totalStake;
+      const lossOther = -totalStake;
 
-  updatePercentages();
-
-  // Calculate functions for goals markets
-  function calculateGoalsMarket(resultId, goalNumbers, overId, underId, floatId) {
-    const overOdds = parseFloat(document.getElementById(overId).value) || 0;
-    const underOdds = parseFloat(document.getElementById(underId).value) || 0;
-    const floatAmount = parseFloat(document.getElementById(floatId).value) || 0;
-
-    if (overOdds <= 0 || underOdds <= 0 || floatAmount <= 0) {
-      document.getElementById(resultId).innerHTML = "<p style='color:red;'>Please enter positive values for all inputs.</p>";
-      return;
-    }
-
-    // Calculate implied probabilities
-    const overProb = 1 / overOdds;
-    const underProb = 1 / underOdds;
-    const totalProb = overProb + underProb;
-
-    // Adjusted stakes
-    const overStake = floatAmount * (overProb / totalProb);
-    const underStake = floatAmount * (underProb / totalProb);
-
-    // Calculate payouts and profits
-    const payouts = {
-      over: overStake * overOdds,
-      under: underStake * underOdds
-    };
-
-    // Build output table
-    let html = `<table style="width:100%; border-collapse: collapse; margin-top:10px;">
-      <thead>
-        <tr>
-          <th>Number of Goals</th>
-          <th>Profit / Loss (£)</th>
-        </tr>
-      </thead>
-      <tbody>
-    `;
-
-    // Show profit for the specified goal numbers only (for 2 and/or 3)
-    for (let goals = 0; goals <= 5; goals++) {
-      let profit = 0;
-      if (goalNumbers.includes(goals.toString())) {
-        // Profit if goals match specified numbers = payout - total float
-        if (goals === 2) {
-          profit = payouts.over - floatAmount;
-        } else if (goals === 3) {
-          profit = payouts.under - floatAmount;
-        }
-      } else {
-        // For other goals, loss is total float
-        profit = -floatAmount;
+      let tableRows = '';
+      for (let i = 0; i <= 5; i++) {
+        const goalsLabel = (i === 5) ? '5+' : i.toString();
+        const isWin = winGoals.includes(i.toString());
+        const profit = isWin ? returnOnWin : lossOther;
+        const css = isWin ? 'positive' : 'negative';
+        tableRows += `<tr><td>${goalsLabel}</td><td class="${css}">${profit >= 0 ? '+£' : '-£'}${Math.abs(profit).toFixed(2)}</td></tr>`;
       }
 
-      // Display "5+" for row 5
-      const goalsLabel = goals === 5 ? "5+" : goals;
-
-      html += `<tr>
-        <td>${goalsLabel}</td>
-        <td style="color:${profit >= 0 ? 'green' : 'red'};">${profit >= 0 ? '+' : ''}£${profit.toFixed(2)}</td>
-      </tr>`;
+      document.getElementById(resultId).innerHTML = `
+        <p class="stake-value">Over 1.5 Stake: £${overStake.toFixed(2)}</p>
+        <p class="stake-value">Under 2.5 Stake: £${underStake.toFixed(2)}</p>
+        <table class="highlight-yellow">
+          <thead><tr><th>Number of Goals</th><th>P/L</th></tr></thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      `;
     }
-    html += '</tbody></table>';
 
-    document.getElementById(resultId).innerHTML = html;
-  }
+    // --- Mobile navigation JS ---
+    function isMobile() {
+      return window.matchMedia("(max-width: 768px)").matches;
+    }
 
-  // Mobile navigation handler
-  function handleMobileNav(event, sectionId) {
-    if (window.innerWidth <= 768) {
+    function handleMobileNav(event, sectionId) {
+      if (!isMobile()) {
+        // Desktop: normal anchor behavior
+        return true;
+      }
       event.preventDefault();
-      // Hide all sections, show only selected
-      document.querySelectorAll('section.calculator').forEach(sec => {
-        sec.classList.remove('active');
+
+      // Hide all sections except target
+      const sections = document.querySelectorAll('section');
+      sections.forEach(sec => {
+        sec.style.display = (sec.id === sectionId) ? 'block' : 'none';
       });
-      document.getElementById(sectionId).classList.add('active');
 
       // Show back button
       document.getElementById('backToFullViewBtn').style.display = 'block';
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
       return false;
     }
-    // On desktop, do normal jump
-    return true;
-  }
 
-  function showAllSections() {
-    document.querySelectorAll('section.calculator').forEach(sec => {
-      sec.classList.add('active');
+    function showAllSections() {
+      const sections = document.querySelectorAll('section');
+      sections.forEach(sec => sec.style.display = 'block');
+      document.getElementById('backToFullViewBtn').style.display = 'none';
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.addEventListener('resize', () => {
+      if (!isMobile()) {
+        showAllSections();
+      }
     });
-    document.getElementById('backToFullViewBtn').style.display = 'none';
-  }
 
-  // On desktop, show all calculators by default
-  if (window.innerWidth > 768) {
-    showAllSections();
-  }
-
-</script>
+  </script>
 </body>
 </html>
+
+
