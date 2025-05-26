@@ -1,15 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
   <title>Betting Odds Calculator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
-      max-width: 600px;
-      margin: auto;
     }
     table {
       border-collapse: collapse;
@@ -48,61 +45,6 @@
     .highlight-grey {
       background-color: #f0f0f0;
     }
-
-    /* === 2 Goals Market Form Styling === */
-    #exactly2GoalsMarket {
-      margin-bottom: 30px;
-    }
-    .form-group {
-      margin-bottom: 15px;
-      display: flex;
-      flex-direction: column;
-      max-width: 300px;
-    }
-    .form-group label {
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-    .form-group input[type="number"] {
-      padding: 6px 10px;
-      font-size: 1rem;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    #exactly2GoalsMarket button {
-      padding: 10px 15px;
-      font-size: 1rem;
-      cursor: pointer;
-      max-width: 300px;
-    }
-
-    /* === Highlight stake values in results === */
-    .stake-highlight {
-      background-color: #d0e7ff; /* light blue */
-      padding: 6px 10px;
-      border-radius: 4px;
-      font-weight: bold;
-      max-width: 300px;
-      margin-bottom: 10px;
-    }
-
-    /* === Responsive adjustments === */
-    @media (max-width: 480px) {
-      body {
-        padding: 10px;
-        font-size: 14px;
-      }
-      nav a {
-        display: block;
-        margin-bottom: 10px;
-      }
-      #exactly2GoalsMarket, 
-      #exactly2GoalsMarket button,
-      .form-group input[type="number"] {
-        max-width: 100%;
-        width: 100%;
-      }
-    }
   </style>
 </head>
 <body>
@@ -134,24 +76,30 @@
   <div id="comment"></div>
 
   <h2 id="exactly2GoalsMarket">Create Exactly 2 Goals Market</h2>
-  <div id="exactly2GoalsMarketForm">
-    <div class="form-group">
-      <label for="over15">Over 1.5 Goals Odds:</label>
-      <input type="number" id="over15" step="0.01" />
-    </div>
-    <div class="form-group">
-      <label for="under25">Under 2.5 Goals Odds:</label>
-      <input type="number" id="under25" step="0.01" />
-    </div>
-    <div class="form-group">
-      <label for="floatAmount">Float (£):</label>
-      <input type="number" id="floatAmount" step="0.01" />
-    </div>
-    <button onclick="calculateGoalsMarket('twoGoalsResults', ['2'], 'over15', 'under25', 'floatAmount')">Calculate</button>
-  </div>
+  <label>Over 1.5 Goals Odds: <input type="number" id="over15" step="0.01"></label><br><br>
+  <label>Under 2.5 Goals Odds: <input type="number" id="under25" step="0.01"></label><br><br>
+  <label>Float (£): <input type="number" id="floatAmount" step="0.01"></label><br><br>
+  <button onclick="calculateGoalsMarket('twoGoalsResults', ['2'], 'over15', 'under25', 'floatAmount')">Calculate</button>
   <div id="twoGoalsResults"></div>
 
-  <!-- Removed the unwanted markets entirely -->
+  <h2>Additional Goal Markets</h2>
+  <div class="highlight-grey">
+    <h3>Exactly 1 Goal</h3>
+    <button onclick="calculateGoalsMarket('oneGoalResults', ['1'], 'over15', 'under25', 'floatAmount')">Calculate</button>
+    <div id="oneGoalResults"></div>
+
+    <h3>Exactly 3 Goals</h3>
+    <button onclick="calculateGoalsMarket('threeGoalsResults', ['3'], 'over15', 'under25', 'floatAmount')">Calculate</button>
+    <div id="threeGoalsResults"></div>
+
+    <h3>Exactly 2 and 3 Goals</h3>
+    <button onclick="calculateGoalsMarket('twoThreeGoalsResults', ['2', '3'], 'over15', 'under25', 'floatAmount')">Calculate</button>
+    <div id="twoThreeGoalsResults"></div>
+
+    <h3>Exactly 3 and 4 Goals</h3>
+    <button onclick="calculateGoalsMarket('threeFourGoalsResults', ['3', '4'], 'over15', 'under25', 'floatAmount')">Calculate</button>
+    <div id="threeFourGoalsResults"></div>
+  </div>
 
   <script>
     const odds = [2.86, 4, 6.8, 6.8, 9.4, 85];
@@ -251,8 +199,8 @@
       }
 
       document.getElementById(resultId).innerHTML = `
-        <p class="stake-highlight">Over 1.5 Stake: £${overStake.toFixed(2)}</p>
-        <p class="stake-highlight">Under 2.5 Stake: £${underStake.toFixed(2)}</p>
+        <p>Over 1.5 Stake: £${overStake.toFixed(2)}</p>
+        <p>Under 2.5 Stake: £${underStake.toFixed(2)}</p>
         <table class="highlight-yellow">
           <thead><tr><th>Number of Goals</th><th>P/L</th></tr></thead>
           <tbody>${tableRows}</tbody>
@@ -262,3 +210,4 @@
   </script>
 </body>
 </html>
+
