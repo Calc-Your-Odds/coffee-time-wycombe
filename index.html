@@ -168,6 +168,25 @@
     <button onclick="calculateGoalsMarket('twoGoalsResults', ['2'], 'over15', 'under25', 'floatAmount')">Calculate</button>
   </div>
   <div id="twoGoalsResults"></div>
+<h2 id="twoThreeGoalSpread">2 and 3 Goal Spread</h2>
+<div id="twoThreeGoalsMarketForm">
+  <div class="form-group">
+    <span class="underline">Input below</span>
+    <label for="over15b" style="margin-top:5px;">Over 1.5 Goals Odds:</label>
+    <input type="number" id="over15b" step="0.01" min="0" />
+  </div>
+  <div class="form-group">
+    <span class="underline">Input below</span>
+    <label for="under35b" style="margin-top:5px;">Under 3.5 Goals Odds:</label>
+    <input type="number" id="under35b" step="0.01" min="0" />
+  </div>
+  <div class="form-group">
+    <label for="floatAmountB">Float (£):</label>
+    <input type="number" id="floatAmountB" step="0.01" min="0" />
+  </div>
+  <button onclick="calculateGoalsMarket('twoThreeGoalsResults', ['2', '3'], 'over15b', 'under35b', 'floatAmountB')">Calculate</button>
+</div>
+<div id="twoThreeGoalsResults"></div>
 
   <script>
     // Initialize 10 rows with empty odds (default 0)
