@@ -26,4 +26,4 @@ jobs:
           path: '.'  # assumes your site is in the root directory
 
       - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v3
