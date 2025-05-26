@@ -32,6 +32,12 @@
     .negative {
       color: red;
     }
+    #comment {
+      margin-top: 10px;
+      font-weight: bold;
+      color: green;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -42,9 +48,7 @@
         <th>Odds</th>
         <th>Percentage</th>
         <th>Stake</th>
-        <th>Status</th>
         <th>Return</th>
-        <th>New Over-Round</th>
       </tr>
     </thead>
     <tbody>
@@ -52,13 +56,13 @@
     </tbody>
     <tfoot>
       <tr>
-        <td><strong>Total:</strong></td>
+        <td><strong>Total Over round:</strong></td>
         <td id="totalPercentage">0%</td>
-        <td colspan="4"></td>
+        <td colspan="2"></td>
       </tr>
     </tfoot>
   </table>
-
+  <div id="comment"></div>
   <script>
     const odds = [2.86, 4, 6.8, 6.8, 9.4, 85];
 
@@ -69,10 +73,8 @@
       row.innerHTML = `
         <td><input type="number" step="0.01" value="${odd}" class="oddInput" data-index="${index}" /></td>
         <td class="percentageCell">${(1 / odd * 100).toFixed(2)}%</td>
-        <td><input type="number" step="0.01" class="stakeInput" data-index="${index}" /></td>
-        <td><button class="statusButton" data-index="${index}">Unmatched</button></td>
+        <td><input type="number" step="0.01" class="stakeInput" data-index="index" /></td>
         <td class="returnCell">-</td>
-        <td class="newOverRoundCell">-</td>
       `;
 
       table.appendChild(row);
@@ -88,84 +90,35 @@
         total += percentage;
       });
       document.getElementById('totalPercentage').textContent = `${total.toFixed(2)}%`;
+      const comment = document.getElementById('comment');
+      if (total < 100) {
+        comment.textContent = 'With these odds a profitable cash out opportunity exists';
+      } else {
+        comment.textContent = '';
+      }
     }
 
     function updateReturns() {
       const rows = document.querySelectorAll('#oddsTable tbody tr');
-      const stakes = [];
-      const matchedIndexes = [];
-      let matchedTotal = 0;
-
-      rows.forEach((row, index) => {
+      rows.forEach(row => {
         const odd = parseFloat(row.querySelector('.oddInput').value);
         const stake = parseFloat(row.querySelector('.stakeInput').value) || 0;
-        const status = row.querySelector('.statusButton').textContent;
-
-        stakes.push({ odd, stake, matched: status === 'Matched' });
-        if (status === 'Matched') {
-          matchedTotal += 1 / odd * 100;
-          matchedIndexes.push(index);
-        }
-      });
-
-      rows.forEach((row, index) => {
-        const { odd, stake, matched } = stakes[index];
         const returnCell = row.querySelector('.returnCell');
-        const overRoundCell = row.querySelector('.newOverRoundCell');
 
-        returnCell.classList.remove('positive', 'negative');
-
-        if (matched) {
-          row.className = 'matched';
-          const profit = stake * (odd - 1);
-          let loss = 0;
-          stakes.forEach((s, i) => {
-            if (i !== index && s.matched) {
-              loss += s.stake;
-            }
-          });
-          const net = profit - loss;
-          if (net >= 0) {
-            returnCell.textContent = `+£${net.toFixed(2)}`;
-            returnCell.classList.add('positive');
-          } else {
-            returnCell.textContent = `-£${Math.abs(net).toFixed(2)}`;
-            returnCell.classList.add('negative');
-          }
-          overRoundCell.textContent = `${(1 / odd * 100).toFixed(2)}%`;
+        const profit = stake * (odd - 1);
+        if (profit >= 0) {
+          returnCell.textContent = `+£${profit.toFixed(2)}`;
+          returnCell.className = 'returnCell positive';
         } else {
-          row.className = 'unmatched';
-          let loss = 0;
-          stakes.forEach((s, i) => {
-            if (s.matched) {
-              loss += s.stake;
-            }
-          });
-          returnCell.textContent = `-£${loss.toFixed(2)}`;
-          returnCell.classList.add('negative');
-          overRoundCell.textContent = matchedTotal.toFixed(2) + '%';
+          returnCell.textContent = `-£${Math.abs(profit).toFixed(2)}`;
+          returnCell.className = 'returnCell negative';
         }
       });
     }
 
-    function toggleMatch(index) {
-      const rows = document.querySelectorAll('#oddsTable tbody tr');
-      const row = rows[index];
-      const button = row.querySelector('.statusButton');
-
-      if (button.textContent === 'Unmatched') {
-        button.textContent = 'Matched';
-      } else {
-        button.textContent = 'Unmatched';
-      }
-      updateReturns();
-    }
-
-    // Initialize rows
     odds.forEach((odd, index) => createRow(odd, index));
     updatePercentages();
 
-    // Add event listeners
     document.querySelectorAll('.oddInput').forEach(input => {
       input.addEventListener('input', () => {
         updatePercentages();
@@ -176,12 +129,7 @@
     document.querySelectorAll('.stakeInput').forEach(input => {
       input.addEventListener('input', updateReturns);
     });
-
-    document.querySelectorAll('.statusButton').forEach(button => {
-      button.addEventListener('click', () => {
-        toggleMatch(parseInt(button.dataset.index));
-      });
-    });
   </script>
 </body>
 </html>
+
