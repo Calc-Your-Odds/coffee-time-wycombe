@@ -7,6 +7,20 @@
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
+      margin: 0;
+    }
+    nav {
+      margin-bottom: 20px;
+    }
+    nav a {
+      margin-right: 20px;
+      font-weight: bold;
+      text-decoration: none;
+      color: #3366cc;
+    }
+    h2 {
+      margin-top: 40px;
+      margin-bottom: 15px;
     }
     table {
       border-collapse: collapse;
@@ -14,13 +28,14 @@
       margin-bottom: 30px;
       table-layout: fixed;
       word-wrap: break-word;
+      overflow-x: auto;
     }
     th, td {
       border: 1px solid #ddd;
       padding: 8px;
       text-align: center;
-      /* Wider columns for these specifically */
     }
+    /* Wider columns for Single Line Return & Market P/L */
     th:nth-child(4), th:nth-child(5),
     td:nth-child(4), td:nth-child(5) {
       min-width: 140px;
@@ -41,26 +56,32 @@
       color: green;
       text-align: center;
     }
-    nav a {
-      margin-right: 20px;
-      font-weight: bold;
-      text-decoration: none;
-      color: #3366cc;
-    }
     .highlight-yellow {
       background-color: #fffde7;
-    }
-    .highlight-grey {
-      background-color: #f0f0f0;
-      padding: 15px;
-      margin-bottom: 30px;
     }
     label {
       display: block;
       margin-bottom: 12px;
+      font-weight: normal;
     }
     label strong {
       margin-right: 6px;
+    }
+    input[type="number"] {
+      width: 200px;
+      max-width: 100%;
+      padding: 6px 8px;
+      box-sizing: border-box;
+    }
+    button {
+      cursor: pointer;
+      padding: 10px 20px;
+      font-weight: bold;
+      background-color: #3366cc;
+      border: none;
+      color: white;
+      border-radius: 4px;
+      margin-top: 10px;
     }
     .stake-value {
       background-color: #d9f0ff;
@@ -69,6 +90,45 @@
       font-weight: bold;
       display: inline-block;
       margin-top: 6px;
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+      nav {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 25px;
+      }
+      nav a {
+        margin-bottom: 10px;
+        margin-right: 0;
+        font-size: 16px;
+      }
+      table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+      th, td {
+        padding: 6px 4px;
+      }
+      /* Make inputs & buttons full width */
+      input[type="number"] {
+        width: 100%;
+      }
+      button {
+        width: 100%;
+        font-size: 16px;
+      }
+      label {
+        font-size: 16px;
+      }
+      #comment {
+        font-size: 16px;
+      }
     }
   </style>
 </head>
@@ -80,7 +140,7 @@
   </nav>
 
   <h2 id="backBetCalculator">Back Betting Odds Calculator</h2>
-  <table id="oddsTable">
+  <table id="oddsTable" aria-label="Back Betting Odds Calculator Table">
     <thead>
       <tr>
         <th>Odds</th>
@@ -99,7 +159,7 @@
       </tr>
     </tfoot>
   </table>
-  <div id="comment"></div>
+  <div id="comment" role="alert"></div>
 
   <h2 id="exactly2GoalsMarket">Create Exactly 2 Goals Market</h2>
   <label><strong>Back -</strong> Over 1.5 Goals Odds: <input type="number" id="over15" step="0.01" /></label>
@@ -117,17 +177,16 @@
 
   <script>
     const defaultOdds = [2.86, 4, 6.8, 6.8, 9.4, 85, 10, 12, 15, 18, 20, 25, 30, 35, 40];
-    
-    // Create rows, allow blank or 0 odds
+
     function createRow(odd, index) {
       const table = document.querySelector('#oddsTable tbody');
       const row = document.createElement('tr');
       row.innerHTML = `
-        <td><input type="number" min="0" step="0.01" value="${odd > 0 ? odd : ''}" class="oddInput" data-index="${index}" /></td>
-        <td class="percentageCell">-</td>
-        <td><input type="number" min="0" step="0.01" class="stakeInput" data-index="${index}" /></td>
-        <td class="returnCell">-</td>
-        <td class="marketPLCell">-</td>
+        <td><input type="number" min="0" step="0.01" value="${odd > 0 ? odd : ''}" class="oddInput" data-index="${index}" aria-label="Odds for row ${index + 1}" /></td>
+        <td class="percentageCell" aria-live="polite">-</td>
+        <td><input type="number" min="0" step="0.01" class="stakeInput" data-index="${index}" aria-label="Stake for row ${index + 1}" /></td>
+        <td class="returnCell" aria-live="polite">-</td>
+        <td class="marketPLCell" aria-live="polite">-</td>
       `;
       table.appendChild(row);
     }
@@ -184,7 +243,6 @@
       });
     }
 
-    // Create 15 rows
     for (let i = 0; i < 15; i++) {
       createRow(defaultOdds[i] || 0, i);
     }
@@ -200,7 +258,6 @@
       input.addEventListener('input', updateReturns);
     });
 
-    // Updated calculateGoalsMarket with "5+" label on last row
     function calculateGoalsMarket(resultId, winGoals, overId, underId, floatId) {
       const overOdds = parseFloat(document.getElementById(overId).value);
       const underOdds = parseFloat(document.getElementById(underId).value);
@@ -230,7 +287,7 @@
       document.getElementById(resultId).innerHTML = `
         <p><span class="stake-value">Over Stake: £${overStake.toFixed(2)}</span></p>
         <p><span class="stake-value">Under Stake: £${underStake.toFixed(2)}</span></p>
-        <table class="highlight-yellow">
+        <table class="highlight-yellow" aria-label="Profit and Loss Table">
           <thead><tr><th>Number of Goals</th><th>P/L</th></tr></thead>
           <tbody>${tableRows}</tbody>
         </table>
@@ -239,5 +296,6 @@
   </script>
 </body>
 </html>
+
 
 
