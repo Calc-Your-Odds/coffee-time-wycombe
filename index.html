@@ -124,25 +124,191 @@
 
   <section id="exactly2GoalsMarketSection" class="calculator-box">
     <h2>Create Exactly 2 Goals Market</h2>
-    <label><b>Back - Over 1.5 Goals Odds:</b><br /><input type="number" id="over15" step="0.01" /></label>
-    <label><b>Back - Under 2.5 Goals Odds:</b><br /><input type="number" id="under25" step="0.01" /></label>
-    <label><b>Float (£):</b><br /><input type="number" id="floatAmount" step="0.01" /></label>
+    <label><b>Back - Over 1.5 Goals Odds:</b><br /><input type="number" id="over15" step="0.01" /></label><br /><br />
+    <label><b>Back - Under 2.5 Goals Odds:</b><br /><input type="number" id="under25" step="0.01" /></label><br /><br />
+    <label><b>Float (£):</b><br /><input type="number" id="floatAmount" step="0.01" /></label><br /><br />
     <button onclick="calculateGoalsMarket('twoGoalsResults', ['2'], 'over15', 'under25', 'floatAmount')">Calculate</button>
     <div id="twoGoalsResults"></div>
   </section>
 
   <section id="twoThreeSpreadSection" class="calculator-box">
     <h2>Create 2 and 3 Goal Spread</h2>
-    <label><b>Back - Over 1.5 Goals Odds:</b><br /><input type="number" id="spreadOver15" step="0.01" /></label>
-    <label><b>Back - Under 3.5 Goals Odds:</b><br /><input type="number" id="spreadUnder35" step="0.01" /></label>
-    <label><b>Float (£):</b><br /><input type="number" id="spreadFloatAmount" step="0.01" /></label>
+    <label><b>Back - Over 1.5 Goals Odds:</b><br /><input type="number" id="spreadOver15" step="0.01" /></label><br /><br />
+    <label><b>Back - Under 3.5 Goals Odds:</b><br /><input type="number" id="spreadUnder35" step="0.01" /></label><br /><br />
+    <label><b>Float (£):</b><br /><input type="number" id="spreadFloatAmount" step="0.01" /></label><br /><br />
     <button onclick="calculateGoalsMarket('spreadResults', ['2','3'], 'spreadOver15', 'spreadUnder35', 'spreadFloatAmount')">Calculate</button>
     <div id="spreadResults"></div>
   </section>
 
-  <!-- Your existing JS goes here unchanged -->
   <script>
-    // Existing JavaScript from before...
+    // Increase odds table rows to 15, allow blank or 0 odds
+    const initialOdds = Array(15).fill(0);
+    initialOdds[0] = 2.86;
+    initialOdds[1] = 4;
+    initialOdds[2] = 6.8;
+    initialOdds[3] = 6.8;
+    initialOdds[4] = 9.4;
+    initialOdds[5] = 85;
+
+    function createRow(odd, index) {
+      const table = document.querySelector('#oddsTable tbody');
+      const row = document.createElement('tr');
+
+      row.innerHTML = `
+        <td><input type="number" step="0.01" value="${odd > 0 ? odd : ''}" class="oddInput" data-index="${index}" /></td>
+        <td class="percentageCell">${odd > 0 ? (1 / odd * 100).toFixed(2) + '%' : '0.00%'}</td>
+        <td><input type="number" step="0.01" class="stakeInput" data-index="${index}" /></td>
+        <td class="returnCell">-</td>
+        <td class="marketPLCell">-</td>
+      `;
+
+      table.appendChild(row);
+    }
+
+    function updatePercentages() {
+      const rows = document.querySelectorAll('#oddsTable tbody tr');
+      let total = 0;
+      rows.forEach(row => {
+        const oddInput = row.querySelector('.oddInput');
+        const odd = parseFloat(oddInput.value);
+        let percentage = 0;
+        if (odd && odd > 0) {
+          percentage = 1 / odd * 100;
+        }
+        row.querySelector('.percentageCell').textContent = `${percentage.toFixed(2)}%`;
+        total += percentage;
+      });
+      document.getElementById('totalPercentage').textContent = `${total.toFixed(2)}%`;
+      const comment = document.getElementById('comment');
+      if (total < 100) {
+        comment.textContent = 'With these odds a profitable cash out opportunity exists';
+      } else {
+        comment.textContent = '';
+      }
+    }
+
+    function updateReturns() {
+      const rows = document.querySelectorAll('#oddsTable tbody tr');
+      const stakes = Array.from(rows).map(row => parseFloat(row.querySelector('.stakeInput').value) || 0);
+      const totalStaked = stakes.reduce((a, b) => a + b, 0);
+
+      rows.forEach((row, index) => {
+        const oddInput = row.querySelector('.oddInput');
+        const odd = parseFloat(oddInput.value);
+        const stake = stakes[index];
+        const returnCell = row.querySelector('.returnCell');
+        const marketCell = row.querySelector('.marketPLCell');
+
+        if (!odd || odd <= 0) {
+          returnCell.textContent = '-';
+          marketCell.textContent = '-';
+          return;
+        }
+
+        const profit = stake * (odd - 1);
+        const net = profit - (totalStaked - stake);
+
+        returnCell.textContent = `+£${(stake * odd).toFixed(2)}`;
+        returnCell.className = 'returnCell';
+
+        marketCell.textContent = net >= 0 ? `+£${net.toFixed(2)}` : `-£${Math.abs(net).toFixed(2)}`;
+        marketCell.className = 'marketPLCell ' + (net >= 0 ? 'positive' : 'negative');
+      });
+    }
+
+    // Initialize table with 15 rows
+    initialOdds.forEach((odd, index) => createRow(odd, index));
+    updatePercentages();
+
+    document.querySelectorAll('.oddInput').forEach(input => {
+      input.addEventListener('input', () => {
+        updatePercentages();
+        updateReturns();
+      });
+    });
+
+    document.querySelectorAll('.stakeInput').forEach(input => {
+      input.addEventListener('input', updateReturns);
+    });
+
+    // Calculation for goals market
+    function calculateGoalsMarket(resultId, winGoals, overId, underId, floatId) {
+      const overOdds = parseFloat(document.getElementById(overId).value);
+      const underOdds = parseFloat(document.getElementById(underId).value);
+      const floatAmount = parseFloat(document.getElementById(floatId).value);
+
+      if (!overOdds || !underOdds || !floatAmount) {
+        document.getElementById(resultId).innerHTML = '<p style="color:red;">Please fill all fields.</p>';
+        return;
+      }
+
+      const overStake = (1 / overOdds) * floatAmount;
+      const underStake = (1 / underOdds) * floatAmount;
+      const totalStake = overStake + underStake;
+
+      const returnOnWin = (overStake * overOdds) + (underStake * underOdds) - totalStake;
+      const lossOther = -totalStake;
+
+      let tableRows = '';
+      for (let i = 0; i <= 5; i++) {
+        const displayGoal = i === 5 ? '5+' : i;
+        let profit;
+        if (winGoals.includes(i.toString())) {
+          profit = returnOnWin;
+        } else {
+          profit = lossOther;
+        }
+        const profitText = profit >= 0 ? `+£${profit.toFixed(2)}` : `-£${Math.abs(profit).toFixed(2)}`;
+        const profitClass = profit >= 0 ? 'positive' : 'negative';
+        tableRows += `
+          <tr>
+            <td>${displayGoal}</td>
+            <td class="${profitClass}">${profitText}</td>
+          </tr>
+        `;
+      }
+
+      document.getElementById(resultId).innerHTML = `
+        <table style="margin-top:10px; width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr><th>Number of goals</th><th>Profit</th></tr>
+          </thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      `;
+    }
+
+    // Mobile view handling
+    function handleMobileNav(event, sectionId) {
+      event.preventDefault();
+      if (window.innerWidth <= 768) {
+        const allSections = document.querySelectorAll('section');
+        allSections.forEach(s => s.style.display = 'none');
+        document.getElementById(sectionId).style.display = 'block';
+        document.getElementById('backToFullViewBtn').style.display = 'block';
+      } else {
+        return true; // let default anchor behavior occur on desktop
+      }
+      return false;
+    }
+
+    function showAllSections() {
+      const allSections = document.querySelectorAll('section');
+      allSections.forEach(s => s.style.display = 'block');
+      document.getElementById('backToFullViewBtn').style.display = 'none';
+    }
+
+    // Initialize view on load
+    window.addEventListener('load', () => {
+      // Ensure all sections visible on desktop by default
+      if (window.innerWidth > 768) {
+        showAllSections();
+      } else {
+        // Mobile: show all sections initially (or pick one?)
+        showAllSections();
+      }
+    });
+
   </script>
 </body>
 </html>
