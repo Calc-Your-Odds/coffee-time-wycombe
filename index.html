@@ -1,328 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Betting Odds Calculator</title>
+  <meta charset="UTF-8">
+  <title>Pokémon Gallery</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
-    }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-bottom: 30px;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
       text-align: center;
+      background-color: #f4f4f4;
     }
-    th {
-      background-color: #f9f9f9;
-    }
-    .positive {
-      color: green;
-    }
-    .negative {
-      color: red;
-    }
-    #comment {
-      margin-top: 10px;
-      font-weight: bold;
-      color: green;
-      text-align: center;
-    }
-    nav a {
-      margin-right: 20px;
-      font-weight: bold;
-      text-decoration: none;
-      color: #3366cc;
-    }
-    .highlight-yellow {
-      background-color: #fffde7;
-    }
-    .highlight-grey {
-      background-color: #f0f0f0;
-    }
-
-    /* === 2 Goals Market Form Styling === */
-    #exactly2GoalsMarket {
-      margin-bottom: 30px;
-    }
-    .form-group {
-      margin-bottom: 15px;
-      display: flex;
-      flex-direction: column;
-      max-width: 300px;
-    }
-    .form-group label {
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-    .form-group input[type="number"] {
-      padding: 6px 10px;
-      font-size: 1rem;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    #exactly2GoalsMarket button {
-      padding: 10px 15px;
-      font-size: 1rem;
-      cursor: pointer;
-      max-width: 300px;
-    }
-
-    /* === Highlight stake values in results === */
-    .stake-highlight {
-      background-color: #d0e7ff; /* light blue */
-      padding: 6px 10px;
-      border-radius: 4px;
-      font-weight: bold;
-      max-width: 300px;
-      margin-bottom: 10px;
-    }
-
-    /* Underline for Input below */
-    .underline {
-      text-decoration: underline;
+    .pokemon {
       display: inline-block;
-      margin-bottom: 5px;
-      font-weight: normal;
+      margin: 20px;
+      padding: 10px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
-
-    /* Prefix text for stakes */
-    .stake-prefix {
-      font-weight: normal;
-      margin-bottom: 3px;
-      font-size: 0.9rem;
-      max-width: 300px;
-    }
-
-    /* === Responsive adjustments === */
-    @media (max-width: 480px) {
-      body {
-        padding: 10px;
-        font-size: 14px;
-      }
-      nav a {
-        display: block;
-        margin-bottom: 10px;
-      }
-      #exactly2GoalsMarket, 
-      #exactly2GoalsMarket button,
-      .form-group input[type="number"] {
-        max-width: 100%;
-        width: 100%;
-      }
+    img {
+      width: 120px;
+      height: 120px;
     }
   </style>
 </head>
 <body>
-  <nav>
-    <a href="#backBetCalculator">Back bet calculator</a>
-    <a href="#exactly2GoalsMarket">Create exactly 2 goals market</a>
-  </nav>
-
-  <h2 id="backBetCalculator">Back bet calculator</h2>
-  <table id="oddsTable">
-    <thead>
-      <tr>
-        <th>Odds</th>
-        <th>Percentage</th>
-        <th>Stake</th>
-        <th>Single Line Return</th>
-        <th>Market P/L</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-    <tfoot>
-      <tr>
-        <td><strong>Total Over round:</strong></td>
-        <td id="totalPercentage">0%</td>
-        <td colspan="3"></td>
-      </tr>
-    </tfoot>
-  </table>
-  <div id="comment"></div>
-
-  <h2 id="exactly2GoalsMarket">Create Exactly 2 Goals Market</h2>
-  <div id="exactly2GoalsMarketForm">
-    <div class="form-group">
-      <span class="underline">Input below</span>
-      <label for="over15" style="margin-top:5px;">Over 1.5 Goals Odds:</label>
-      <input type="number" id="over15" step="0.01" min="0" />
-    </div>
-    <div class="form-group">
-      <span class="underline">Input below</span>
-      <label for="under25" style="margin-top:5px;">Under 2.5 Goals Odds:</label>
-      <input type="number" id="under25" step="0.01" min="0" />
-    </div>
-    <div class="form-group">
-      <label for="floatAmount">Float (£):</label>
-      <input type="number" id="floatAmount" step="0.01" min="0" />
-    </div>
-    <button onclick="calculateGoalsMarket('twoGoalsResults', ['2'], 'over15', 'under25', 'floatAmount')">Calculate</button>
-  </div>
-  <div id="twoGoalsResults"></div>
-<h2 id="twoThreeGoalSpread">2 and 3 Goal Spread</h2>
-<div id="twoThreeGoalsMarketForm">
-  <div class="form-group">
-    <span class="underline">Input below</span>
-    <label for="over15b" style="margin-top:5px;">Over 1.5 Goals Odds:</label>
-    <input type="number" id="over15b" step="0.01" min="0" />
-  </div>
-  <div class="form-group">
-    <span class="underline">Input below</span>
-    <label for="under35b" style="margin-top:5px;">Under 3.5 Goals Odds:</label>
-    <input type="number" id="under35b" step="0.01" min="0" />
-  </div>
-  <div class="form-group">
-    <label for="floatAmountB">Float (£):</label>
-    <input type="number" id="floatAmountB" step="0.01" min="0" />
-  </div>
-  <button onclick="calculateGoalsMarket('twoThreeGoalsResults', ['2', '3'], 'over15b', 'under35b', 'floatAmountB')">Calculate</button>
-</div>
-<div id="twoThreeGoalsResults"></div>
+  <h1>Pokémon Gallery</h1>
+  <div id="pokemon-container"></div>
 
   <script>
-    // Initialize 10 rows with empty odds (default 0)
-    function createRow(odd = '', index) {
-      const table = document.querySelector('#oddsTable tbody');
-      const row = document.createElement('tr');
+    const pokemonList = ['pikachu', 'bulbasaur', 'charmander', 'squirtle', 'eevee'];
+    const container = document.getElementById('pokemon-container');
 
-      row.innerHTML = `
-        <td><input type="number" step="0.01" min="0" value="${odd}" class="oddInput" data-index="${index}" /></td>
-        <td class="percentageCell">0%</td>
-        <td><input type="number" step="0.01" min="0" class="stakeInput" data-index="${index}" /></td>
-        <td class="returnCell">-</td>
-        <td class="marketPLCell">-</td>
+    async function fetchPokemon(name) {
+      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
+      const data = await res.json();
+
+      const card = document.createElement('div');
+      card.className = 'pokemon';
+      card.innerHTML = `
+        <h2>${data.name.charAt(0).toUpperCase() + data.name.slice(1)}</h2>
+        <img src="${data.sprites.front_default}" alt="${data.name}">
+        <p>Type: ${data.types.map(t => t.type.name).join(', ')}</p>
       `;
-
-      table.appendChild(row);
+      container.appendChild(card);
     }
 
-    for (let i = 0; i < 10; i++) {
-      createRow('', i);
-    }
-
-    function updatePercentages() {
-      const rows = document.querySelectorAll('#oddsTable tbody tr');
-      let total = 0;
-      rows.forEach(row => {
-        const oddVal = parseFloat(row.querySelector('.oddInput').value);
-        const percentageCell = row.querySelector('.percentageCell');
-        if (oddVal > 0) {
-          const percentage = 1 / oddVal * 100;
-          percentageCell.textContent = `${percentage.toFixed(2)}%`;
-          total += percentage;
-        } else {
-          percentageCell.textContent = '0%';
-          // zero odds count as 0% for total overround
-        }
-      });
-      document.getElementById('totalPercentage').textContent = `${total.toFixed(2)}%`;
-
-      const comment = document.getElementById('comment');
-      if (total > 0 && total < 100) {
-        comment.textContent = 'With these odds a profitable cash out opportunity exists';
-      } else {
-        comment.textContent = '';
-      }
-    }
-
-    function updateReturns() {
-      const rows = document.querySelectorAll('#oddsTable tbody tr');
-      const stakes = Array.from(rows).map(row => parseFloat(row.querySelector('.stakeInput').value) || 0);
-      const totalStaked = stakes.reduce((a, b) => a + b, 0);
-
-      rows.forEach((row, index) => {
-        const oddVal = parseFloat(row.querySelector('.oddInput').value);
-        const stake = stakes[index];
-        const returnCell = row.querySelector('.returnCell');
-        const marketCell = row.querySelector('.marketPLCell');
-
-        if (oddVal > 0 && stake > 0) {
-          const profit = stake * (oddVal - 1);
-          const net = profit - (totalStaked - stake);
-
-          returnCell.textContent = `+£${(stake * oddVal).toFixed(2)}`;
-          returnCell.className = 'returnCell';
-
-          marketCell.textContent = net >= 0 ? `+£${net.toFixed(2)}` : `-£${Math.abs(net).toFixed(2)}`;
-          marketCell.className = 'marketPLCell ' + (net >= 0 ? 'positive' : 'negative');
-        } else {
-          returnCell.textContent = '-';
-          marketCell.textContent = '-';
-          returnCell.className = 'returnCell';
-          marketCell.className = 'marketPLCell';
-        }
-      });
-    }
-
-    // Attach event listeners for inputs dynamically
-    function attachListeners() {
-      document.querySelectorAll('.oddInput').forEach(input => {
-        input.addEventListener('input', () => {
-          updatePercentages();
-          updateReturns();
-        });
-      });
-
-      document.querySelectorAll('.stakeInput').forEach(input => {
-        input.addEventListener('input', updateReturns);
-      });
-    }
-
-    attachListeners();
-    updatePercentages();
-
-    function calculateGoalsMarket(resultId, winGoals, overId, underId, floatId) {
-      const overOdds = parseFloat(document.getElementById(overId).value);
-      const underOdds = parseFloat(document.getElementById(underId).value);
-      const floatAmount = parseFloat(document.getElementById(floatId).value);
-
-      if (isNaN(overOdds) || isNaN(underOdds) || isNaN(floatAmount)) {
-        document.getElementById(resultId).innerHTML = '<p style="color:red;">Please fill all fields.</p>';
-        return;
-      }
-      if (overOdds < 0 || underOdds < 0 || floatAmount < 0) {
-        document.getElementById(resultId).innerHTML = '<p style="color:red;">Values must be zero or positive.</p>';
-        return;
-      }
-      if (overOdds === 0 || underOdds === 0 || floatAmount === 0) {
-        document.getElementById(resultId).innerHTML = '<p style="color:red;">Odds and float cannot be zero to calculate stakes.</p>';
-        return;
-      }
-
-      const overStake = (1 / overOdds) * floatAmount;
-      const underStake = (1 / underOdds) * floatAmount;
-      const totalStake = overStake + underStake;
-
-      const returnOnWin = (overStake * overOdds) + (underStake * underOdds) - totalStake;
-      const lossOther = -totalStake;
-
-      let tableRows = '';
-      for (let i = 0; i <= 5; i++) {
-        const isWin = winGoals.includes(i.toString());
-        const profit = isWin ? returnOnWin : lossOther;
-        const css = isWin ? 'positive' : 'negative';
-        tableRows += `<tr><td>${i}</td><td class="${css}">${profit >= 0 ? '+£' : '-£'}${Math.abs(profit).toFixed(2)}</td></tr>`;
-      }
-
-      document.getElementById(resultId).innerHTML = `
-        <p class="stake-prefix">Your stakes for Over 1.5 goals and Under 2.5 goals should be the values below if you would like an evenly distributed profit and loss</p>
-        <p class="stake-highlight">Over 1.5 Stake: £${overStake.toFixed(2)}</p>
-        <p class="stake-highlight">Under 2.5 Stake: £${underStake.toFixed(2)}</p>
-        <table class="highlight-yellow">
-          <thead><tr><th>Number of Goals</th><th>P/L</th></tr></thead>
-          <tbody>${tableRows}</tbody>
-        </table>
-      `;
-    }
+    pokemonList.forEach(fetchPokemon);
   </script>
 </body>
 </html>
